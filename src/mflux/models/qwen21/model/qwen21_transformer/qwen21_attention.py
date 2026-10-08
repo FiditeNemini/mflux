@@ -120,7 +120,7 @@ class Qwen21Attention(nn.Module):
         rope_sin: mx.array,
     ) -> tuple[mx.array, mx.array, mx.array]:
         """Shared Q/K/V projection: returns [batch, heads, seq, head_dim]."""
-        if self.use_fused_prologue:
+        if self.use_fused_prologue and self.norm_q.eps == self.norm_k.eps == 1e-6:
             fused = fused_qk_norm_rope(
                 self.to_q(hidden_states),
                 self.to_k(hidden_states),
@@ -132,10 +132,7 @@ class Qwen21Attention(nn.Module):
                 self.head_dim,
             )
             if fused is not None:
-                out_q, out_k = fused
-                batch, length = out_q.shape[:2]
-                query = mx.transpose(out_q.reshape(batch, length, self.num_heads, self.head_dim), (0, 2, 1, 3))
-                key = mx.transpose(out_k.reshape(batch, length, self.num_heads, self.head_dim), (0, 2, 1, 3))
+                query, key = fused
                 value = mx.transpose(
                     mx.reshape(self.to_v(hidden_states), (*hidden_states.shape[:-1], self.num_heads, self.head_dim)),
                     (0, 2, 1, 3),
