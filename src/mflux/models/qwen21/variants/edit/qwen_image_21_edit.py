@@ -12,6 +12,7 @@ from PIL import Image
 from mflux.cli.defaults.defaults import MODEL_INFERENCE_STEPS
 from mflux.models.common.config import ModelConfig
 from mflux.models.common.config.config import Config
+from mflux.models.common.step_cache.step_cache import StepCache as StepReuse
 from mflux.models.common.vae.vae_util import VAEUtil
 from mflux.models.common.weights.saving.model_saver import ModelSaver
 from mflux.models.qwen21.latent_creator.qwen_image21_latent_creator import QwenImage21LatentCreator
@@ -171,6 +172,12 @@ class QwenImage21Edit(nn.Module):
         negative_cache = [] if use_kv_cache else None
         if use_step_cache and not use_kv_cache:
             logger.warning("use_step_cache needs use_kv_cache; running without step skipping")
+        # A short run has no steps to spare: on the six viggle_turbo steps, skipping changed the image
+        # about four times as much as baking the turbo LoRA did. The shared step reuse has the same floor.
+        steps_run = config.num_inference_steps - config.init_time_step
+        if use_step_cache and steps_run < StepReuse.MIN_STEPS:
+            logger.warning(f"use_step_cache skips nothing in a run under {StepReuse.MIN_STEPS} steps")
+            use_step_cache = False
         step_cache = StepCache(step_cache_threshold) if use_step_cache and use_kv_cache else None
         negative_step_cache = (
             StepCache(step_cache_threshold) if step_cache is not None and negative is not None else None

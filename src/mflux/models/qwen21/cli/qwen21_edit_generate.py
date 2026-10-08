@@ -79,7 +79,7 @@ def build_parser() -> CommandLineParser:
         action=argparse.BooleanOptionalAction,
         default=False,
         help="Skip unchanged transformer blocks on similar steps (faster, slightly different output; "
-        "needs --use-kv-cache).",
+        "needs --use-kv-cache; runs under 10 steps skip nothing).",
     )
     parser.add_argument(
         "--step-cache-threshold",
