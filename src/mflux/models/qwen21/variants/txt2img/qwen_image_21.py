@@ -121,7 +121,7 @@ class QwenImage21(nn.Module):
             signal_fn=self.transformer.time_text_embed,
         )
 
-        try:
+        with self.transformer.inference_projections():
             for t in config.time_steps:
                 try:
                     latents = config.scheduler.scale_model_input(latents, t)
@@ -154,9 +154,6 @@ class QwenImage21(nn.Module):
                     raise StopImageGenerationException(
                         f"Stopping image generation at step {t + 1}/{config.num_inference_steps}"
                     )
-        finally:
-            # the text-prefix K/V cache is O(100 MB) per prompt: free it when the loop ends
-            self.transformer.clear_text_cache()
 
         ctx.after_loop(latents)
 

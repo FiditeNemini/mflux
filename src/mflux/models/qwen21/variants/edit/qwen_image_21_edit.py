@@ -184,38 +184,39 @@ class QwenImage21Edit(nn.Module):
         )
         ctx = self.callbacks.start(seed=seed, prompt=prompt, config=config)
         ctx.before_loop(latents)
-        for t in config.time_steps:
-            try:
-                model_input = mx.concatenate([condition_latents, latents], axis=1) if conditions else latents
-                # Match diffusers: cast the 0..1000 timestep before dividing by 1000.
-                timestep = (config.scheduler.sigmas[t : t + 1] * 1000).astype(latents.dtype) / 1000
-                noise = self.transformer(model_input, prompt_embeds, timestep, layout, cache, step_cache=step_cache)
-                if negative is not None:
-                    uncond = self.transformer(
-                        model_input,
-                        negative[0],
-                        timestep,
-                        negative_layout,
-                        negative_cache,
-                        step_cache=negative_step_cache,
-                    )
-                    noise = uncond + guidance * (noise - uncond)
-                # The upstream Euler update accumulates in fp32 and casts back afterward.
-                sigma = config.scheduler.sigmas
-                latents = (latents.astype(mx.float32) + (sigma[t + 1] - sigma[t]) * noise.astype(mx.float32)).astype(
-                    latents.dtype
-                )
-                if blend_mask is not None:
-                    # the state now sits at sigma_{t+1}; pin unmasked tokens to the source there
-                    noised = blend_source + sigma[t + 1] * (noise_init - blend_source)
-                    latents = (blend_mask * latents + (1 - blend_mask) * noised).astype(latents.dtype)
-                mx.eval(latents)
-                ctx.in_loop(t, latents)
-            except KeyboardInterrupt:  # noqa: PERF203
-                ctx.interruption(t, latents)
-                raise StopImageGenerationException(
-                    f"Stopping image generation at step {t + 1}/{num_inference_steps}"
-                ) from None
+        with self.transformer.inference_projections():
+            for t in config.time_steps:
+                try:
+                    model_input = mx.concatenate([condition_latents, latents], axis=1) if conditions else latents
+                    # Match diffusers: cast the 0..1000 timestep before dividing by 1000.
+                    timestep = (config.scheduler.sigmas[t : t + 1] * 1000).astype(latents.dtype) / 1000
+                    noise = self.transformer(model_input, prompt_embeds, timestep, layout, cache, step_cache=step_cache)
+                    if negative is not None:
+                        uncond = self.transformer(
+                            model_input,
+                            negative[0],
+                            timestep,
+                            negative_layout,
+                            negative_cache,
+                            step_cache=negative_step_cache,
+                        )
+                        noise = uncond + guidance * (noise - uncond)
+                    # The upstream Euler update accumulates in fp32 and casts back afterward.
+                    sigma = config.scheduler.sigmas
+                    latents = (
+                        latents.astype(mx.float32) + (sigma[t + 1] - sigma[t]) * noise.astype(mx.float32)
+                    ).astype(latents.dtype)
+                    if blend_mask is not None:
+                        # the state now sits at sigma_{t+1}; pin unmasked tokens to the source there
+                        noised = blend_source + sigma[t + 1] * (noise_init - blend_source)
+                        latents = (blend_mask * latents + (1 - blend_mask) * noised).astype(latents.dtype)
+                    mx.eval(latents)
+                    ctx.in_loop(t, latents)
+                except KeyboardInterrupt:  # noqa: PERF203
+                    ctx.interruption(t, latents)
+                    raise StopImageGenerationException(
+                        f"Stopping image generation at step {t + 1}/{num_inference_steps}"
+                    ) from None
         ctx.after_loop(latents)
         del cache, negative_cache
         unpacked = QwenImage21LatentCreator.unpack_latents(latents, height, width).astype(mx.float32)

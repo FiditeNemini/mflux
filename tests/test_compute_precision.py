@@ -1,5 +1,6 @@
 import json
 import sys
+from contextlib import nullcontext
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -364,8 +365,8 @@ class FakeTransformer:
     def __call__(self, **kwargs):
         return mx.zeros_like(kwargs["x"] if "x" in kwargs else kwargs["hidden_states"])
 
-    def clear_text_cache(self) -> None:
-        pass
+    def inference_projections(self):
+        return nullcontext()
 
 
 class FakeQwen21EditTransformer:
@@ -373,6 +374,9 @@ class FakeQwen21EditTransformer:
 
     def __call__(self, hidden, text, timestep, layout, cache=None, step_cache=None):
         return mx.zeros((1, layout.target_tokens, hidden.shape[-1]))
+
+    def inference_projections(self):
+        return nullcontext()
 
 
 class FakeVAE:
