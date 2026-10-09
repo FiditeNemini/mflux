@@ -43,6 +43,7 @@ build/
 CLAUDE.md
 CLAUDE.local.md
 tmp-PR-content.md
+tmp-PR-body.md
 .gitnexus
 .agents/skills/gitnexus-cli/SKILL.md
 .agents/skills/gitnexus-debugging/SKILL.md

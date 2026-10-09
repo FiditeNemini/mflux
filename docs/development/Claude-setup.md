@@ -47,8 +47,9 @@ Git reads `#` as a comment only at the start of a line. Thus each comment is on 
 CLAUDE.md
 # Ignore the personal agent instructions.
 CLAUDE.local.md
-# Ignore the PR content file that /mflux-pr-docs makes.
+# Ignore the PR files that /mflux-pr-docs makes.
 tmp-PR-content.md
+tmp-PR-body.md
 ```
 
 ### Sources
