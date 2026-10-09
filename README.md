@@ -276,7 +276,7 @@ individual UI distributions; this namespace support adds none to `mflux`.
 - [mflux-fasthtml](https://github.com/anthonywu/mflux-fasthtml) by [@anthonywu](https://github.com/anthonywu)
 - [mflux-streamlit](https://github.com/elitexp/mflux-streamlit) by [@elitexp](https://github.com/elitexp)
 - [mlx-taef](https://github.com/IonDen/mlx-taef) — TAESD/TAEF tiny-autoencoder live previews and low-memory FLUX decode for mflux, by [@IonDen](https://github.com/IonDen)
-- [mlx-teacache](https://github.com/IonDen/mlx-teacache) — TeaCache step-skipping to speed up FLUX generation in mflux, by [@IonDen](https://github.com/IonDen)
+- [mlx-teacache](https://github.com/IonDen/mlx-teacache) — TeaCache step skipping for FLUX.1 dev and Krea, FLUX.2 Klein base, Z-Image base and Qwen-Image (original checkpoint) in mflux, by [@IonDen](https://github.com/IonDen)
 - [MLXBits Image Studio](https://github.com/MLXBits/image-studio) - A native macOS Swift app for FLUX, Krea 2, Z-Image and more!
 ---
 
