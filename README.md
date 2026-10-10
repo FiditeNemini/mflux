@@ -267,6 +267,14 @@ After installation in the same environment, consumers can use
 discover applications, or mount routes. UI framework dependencies belong to the
 individual UI distributions; this namespace support adds none to `mflux`.
 
+#### Extras under `mflux.extras`
+
+Plugins are optional packages that install next to mflux, put their code under
+`mflux.extras` and add their own commands. mflux's own commands do not change.
+The mflux-community plugins live in
+[mflux-plugins](https://github.com/mflux-community/mflux-plugins). To find,
+install or write one, see [Plugins - User Manual](docs/plugins.md).
+
 #### Community applications
 
 - [MindCraft Studio](https://themindstudio.cc/mindcraft#models) — macOS app built on mflux by [@shaoju](https://github.com/shaoju)
